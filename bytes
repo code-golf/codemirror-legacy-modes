@@ -1,0 +1,19 @@
+#!/usr/bin/env perl
+
+use v5.36;
+
+open my $fh, '>', 'bytes.txt';
+
+my sub out($lang = 'TOTAL', $bytes = 0) {
+    state $total += $bytes;
+
+    printf {$_} "%10s %5d\n", $lang, $bytes || $total for $fh, *STDOUT;
+}
+
+print $fh 'esbuild ', `esbuild --version`, "\n";
+
+out $_, length(`esbuild --minify mode/$_.js`) for qw/
+    cobol commonlisp crystal d fortran go haskell julia lua pascal perl
+    powershell ruby shell swift tcl
+/;
+out;
