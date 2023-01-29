@@ -1,22 +1,15 @@
-var keywords = {
-  "break":true, "case":true, "chan":true, "const":true, "continue":true,
-  "default":true, "defer":true, "else":true, "fallthrough":true, "for":true,
-  "func":true, "go":true, "goto":true, "if":true, "import":true,
-  "interface":true, "map":true, "package":true, "range":true, "return":true,
-  "select":true, "struct":true, "switch":true, "type":true, "var":true,
-  "bool":true, "byte":true, "complex64":true, "complex128":true,
-  "float32":true, "float64":true, "int8":true, "int16":true, "int32":true,
-  "int64":true, "string":true, "uint8":true, "uint16":true, "uint32":true,
-  "uint64":true, "int":true, "uint":true, "uintptr":true, "error": true,
-  "rune":true
-};
+var keywords = new Set((
+  "break case chan const continue default defer else fallthrough for func go"
+  + " goto if import interface map package range return select struct switch"
+  + " type var bool byte complex64 complex128 float32 float64 int8 int16"
+  + " int32 int64 string uint8 uint16 uint32 uint64 int uint uintptr error"
+  + " rune"
+).split` `);
 
-var atoms = {
-  "true":true, "false":true, "iota":true, "nil":true, "append":true,
-  "cap":true, "close":true, "complex":true, "copy":true, "delete":true, "imag":true,
-  "len":true, "make":true, "new":true, "panic":true, "print":true,
-  "println":true, "real":true, "recover":true
-};
+var atoms = new Set((
+  "true false iota nil append cap close complex copy delete imag len make new"
+  + " panic print println real recover"
+).split` `);
 
 var isOperatorChar = /[+\-*&^%:=<>!|\/]/;
 
@@ -58,11 +51,11 @@ function tokenBase(stream, state) {
   }
   stream.eatWhile(/[\w\$_\xa1-\uffff]/);
   var cur = stream.current();
-  if (keywords.propertyIsEnumerable(cur)) {
+  if (keywords.has(cur)) {
     if (cur == "case" || cur == "default") curPunc = "case";
     return "keyword";
   }
-  if (atoms.propertyIsEnumerable(cur)) return "atom";
+  if (atoms.has(cur)) return "atom";
   return "variable";
 }
 
@@ -162,4 +155,3 @@ export const go = {
     commentTokens: {line: "//", block: {open: "/*", close: "*/"}}
   }
 };
-

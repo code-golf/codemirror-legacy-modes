@@ -1,11 +1,6 @@
 var BUILTIN = "builtin", COMMENT = "comment", STRING = "string",
-    ATOM = "atom", NUMBER = "number", KEYWORD = "keyword", MODTAG = "header",
-    COBOLLINENUM = "def", PERIOD = "link";
-function makeKeywords(str) {
-  var obj = {}, words = str.split(" ");
-  for (var i = 0; i < words.length; ++i) obj[words[i]] = true;
-  return obj;
-}
+    ATOM = "atom", NUMBER = "number", KEYWORD = "keyword";
+const makeKeywords = str => new Set(str.split(' '));
 var atoms = makeKeywords("TRUE FALSE ZEROES ZEROS ZERO SPACES SPACE LOW-VALUE LOW-VALUES ");
 var keywords = makeKeywords(
   "ACCEPT ACCESS ACQUIRE ADD ADDRESS " +
@@ -156,6 +151,7 @@ function isNumber(ch, stream){
   return false;
 }
 export const cobol = {
+  languageData: { commentTokens: { line: '*>' } },
   startState: function () {
     return {
       indentStack: null,
@@ -186,39 +182,25 @@ export const cobol = {
       break;
     default: // default parsing mode
       var ch = stream.next();
-      var col = stream.column();
-      if (col >= 0 && col <= 5) {
-        returnType = COBOLLINENUM;
-      } else if (col >= 72 && col <= 79) {
-        stream.skipToEnd();
-        returnType = MODTAG;
-      } else if (ch == "*" && col == 6) { // comment
+      if (ch == '*' && stream.eat('>')) { // comment
         stream.skipToEnd(); // rest of the line is a comment
         returnType = COMMENT;
       } else if (ch == "\"" || ch == "\'") {
         state.mode = "string";
         returnType = STRING;
-      } else if (ch == "'" && !( tests.digit_or_colon.test(stream.peek()) )) {
+      } else if (ch == "'" && !( tests.digitOrColon.test(stream.peek()) )) {
         returnType = ATOM;
-      } else if (ch == ".") {
-        returnType = PERIOD;
       } else if (isNumber(ch,stream)){
         returnType = NUMBER;
       } else {
         if (stream.current().match(tests.symbol)) {
-          while (col < 71) {
-            if (stream.eat(tests.symbol) === undefined) {
-              break;
-            } else {
-              col++;
-            }
-          }
+          stream.eatWhile(tests.symbol);
         }
-        if (keywords && keywords.propertyIsEnumerable(stream.current().toUpperCase())) {
+        if (keywords.has(stream.current().toUpperCase())) {
           returnType = KEYWORD;
-        } else if (builtins && builtins.propertyIsEnumerable(stream.current().toUpperCase())) {
+        } else if (builtins.has(stream.current().toUpperCase())) {
           returnType = BUILTIN;
-        } else if (atoms && atoms.propertyIsEnumerable(stream.current().toUpperCase())) {
+        } else if (atoms.has(stream.current().toUpperCase())) {
           returnType = ATOM;
         } else returnType = null;
       }
@@ -230,4 +212,3 @@ export const cobol = {
     return state.indentStack.indent;
   }
 };
-

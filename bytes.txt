@@ -1,11 +1,11 @@
 esbuild 0.17.5
 
-     cobol  6211
+     cobol  5977
 commonlisp  2305
    crystal  5107
          d  3702
    fortran  4629
-        go  2772
+        go  2582
    haskell  4141
      julia  5364
        lua  3377
@@ -15,5 +15,5 @@ powershell  7743
       ruby  5144
      shell  2531
      swift  3943
-       tcl  2337
-     TOTAL 71304
+       tcl  2246
+     TOTAL 70789
